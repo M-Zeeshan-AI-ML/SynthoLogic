@@ -7,7 +7,6 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # ── Initialize Session State ──────────────────────────────────────────────────
-# Yeh code check karta hai ke kya variables pehle se banay hue hain ya nahi
 if 'df_real' not in st.session_state:
     st.session_state.df_real = None
 
