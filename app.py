@@ -18,10 +18,9 @@ if 'privacy_score' not in st.session_state:
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="SynthoLogic · Synthetic Data Generator",
-    page_icon="⬡",
-    layout="wide",
-    initial_sidebar_state="collapsed",
+    page_title="SynthoLogic | Structural Mind",
+    page_icon="logo.png", # <--- Yeh line browser tab mein aapka logo dikhaye gi
+    layout="wide"
 )
 
 # ── Custom CSS ────────────────────────────────────────────────────────────────
