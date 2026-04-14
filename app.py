@@ -19,7 +19,7 @@ if 'privacy_score' not in st.session_state:
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="SynthoLogic | Structural Mind",
-    page_icon="favicon.png", # <--- Naya file name yahan likhein
+    page_icon="favicon.png"
     layout="wide"
 )
 
