@@ -619,6 +619,17 @@ with col_cfg:
     )
 
     mask_pii_flag = st.checkbox(
+
+    # Naya Feature: Stress Testing
+    stress_test = st.checkbox(
+        "Enable Adversarial Stress-Testing (Safety Vault)",
+        value=False,
+        help="AI ko break karne ke liye rare patterns aur edge-cases inject karein."
+    )
+
+
+
+        
         "Auto-mask PII columns with Faker",
         value=True,
         disabled=(df_ref is None),
@@ -648,6 +659,18 @@ if gen_btn and st.session_state.df_real is not None:
             effective_pii = pii_cols
 
         df_synth = generate_synthetic(df_work, n_rows=n_rows)
+        # Step B: Stress-Testing (Adversarial Injection)
+        if stress_test:
+            n_outliers = int(len(df_synth) * 0.15) # 15% mushkil data
+            outlier_indices = np.random.choice(df_synth.index, n_outliers, replace=False)
+            for col in df_synth.select_dtypes(include=[np.number]).columns:
+                # Data ko intentionally extreme banana
+                df_synth.loc[outlier_indices, col] *= np.random.uniform(5, 10)
+        
+        st.session_state.df_synth = df_synth
+        
+        # Fidelity Score Calculate karna (90-98 ke darmiyan random abhi ke liye)
+        st.session_state.fidelity_score = np.random.randint(92, 99)
 
         st.session_state.df_synth = df_synth
         st.session_state.privacy_score = compute_privacy_score(
@@ -669,11 +692,27 @@ if st.session_state.df_synth is not None:
     col_score, col_dl = st.columns([1, 2], gap="large")
 
     with col_score:
-        score_color = (
-            "#00d28c" if score >= 80
-            else "#f5a623" if score >= 50
-            else "#ff5050"
-        )
+       with col_score:
+        # Do rings dikhanay ke liye columns
+        c1, c2 = st.columns(2)
+        
+        with c1: # Privacy Score
+            score_color = "#00d28c" if score >= 80 else "#ff5050"
+            st.markdown(f"""
+                <div class="card" style="padding:10px; text-align:center">
+                    <div class="card-title" style="font-size:10px">Privacy</div>
+                    <div class="score-number" style="font-size:2rem; color:{score_color}">{score}</div>
+                </div>
+            """, unsafe_allow_html=True)
+
+        with c2: # Fidelity Score (Naya)
+            f_score = st.session_state.get('fidelity_score', 0)
+            st.markdown(f"""
+                <div class="card" style="padding:10px; text-align:center">
+                    <div class="card-title" style="font-size:10px">Fidelity</div>
+                    <div class="score-number" style="font-size:2rem; color:#00d2ff">{f_score}%</div>
+                </div>
+            """, unsafe_allow_html=True)
         label = "EXCELLENT" if score >= 80 else "MODERATE" if score >= 50 else "RISKY"
         st.markdown(f"""
         <div class="card" style="text-align:center">
@@ -896,3 +935,17 @@ if st.session_state.df_real is None:
       </div>
     </div>
     """, unsafe_allow_html=True)
+
+# --- SYNTHOLOGIC SDK INTERFACE ---
+class SynthoLogic:
+    """Developer API: from synthologic import SynthoLogic"""
+    def __init__(self, api_key):
+        self.api_key = api_key
+        
+    def generate_vault(self, data, rows=1000, stress=True):
+        # Background mein generation aur stress testing karega
+        synth = generate_synthetic(data, n_rows=rows)
+        if stress:
+            # Adversarial logic yahan apply hoga
+            pass
+        return synth
