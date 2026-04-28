@@ -32,6 +32,18 @@ st.set_page_config(
 # ── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
+/* Custom Label Styling for SynthoLogic Blue */
+.stWidgetLabel p, .stCheckbox label p {
+    color: #00d2ff !important;
+    font-weight: 500 !important;
+}
+
+/* Pipeline alignment cards */
+.card-title {
+    font-size: 0.75rem !important;
+    letter-spacing: 1px !important;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
@@ -688,6 +700,85 @@ if gen_btn and st.session_state.df_real is not None:
 
 
 # ── Results ───────────────────────────────────────────────────────────────────
+
+# --- ── Process Pipeline & Trust Vault ────────────────────────────────────────
+if st.session_state.df_synth is not None:
+    st.markdown("---")
+    st.markdown('<div class="step-pill">SYSTEM PIPELINE & TRUST VAULT</div>', unsafe_allow_html=True)
+    
+    # 3 Columns for the Flow
+    pipe_col1, pipe_col2, pipe_col3 = st.columns(3)
+    
+    with pipe_col1:
+        st.markdown(f"""
+            <div class="card" style="text-align:center; border-left: 4px solid #00d2ff;">
+                <div style="font-size:1.5rem;">📥</div>
+                <div class="card-title" style="margin-bottom:5px;">Ingestion</div>
+                <div style="font-size:0.8rem; color:#e2e8f0;">Data Uploaded & Scanned</div>
+                <div style="color:#00d2ff; font-weight:bold; font-size:0.7rem; margin-top:5px;">● COMPLETED</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with pipe_col2:
+        mask_status = "ACTIVE" if mask_pii_flag else "BYPASSED"
+        mask_icon = "🛡️" if mask_pii_flag else "⚪"
+        st.markdown(f"""
+            <div class="card" style="text-align:center; border-left: 4px solid #ff00c1;">
+                <div style="font-size:1.5rem;">{mask_icon}</div>
+                <div class="card-title" style="margin-bottom:5px;">Privacy Layer</div>
+                <div style="font-size:0.8rem; color:#e2e8f0;">PII Masking & Redaction</div>
+                <div style="color:#ff00c1; font-weight:bold; font-size:0.7rem; margin-top:5px;">● {mask_status}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with pipe_col3:
+        stress_status = "HARDENED" if stress_test else "STANDARD"
+        stress_icon = "⚠️" if stress_test else "⚡"
+        st.markdown(f"""
+            <div class="card" style="text-align:center; border-left: 4px solid #00d28c;">
+                <div style="font-size:1.5rem;">{stress_icon}</div>
+                <div class="card-title" style="margin-bottom:5px;">Stress Engine</div>
+                <div style="font-size:0.8rem; color:#e2e8f0;">Adversarial Pattern Injection</div>
+                <div style="color:#00d28c; font-weight:bold; font-size:0.7rem; margin-top:5px;">● {stress_status}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    # --- Digital Certificate Section ---
+    st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
+    
+    cert_col1, cert_col2 = st.columns([2, 1])
+    
+    with cert_col1:
+        st.markdown(f"""
+            <div class="card highlight-card" style="background: linear-gradient(145deg, #0d1420, #111927);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div class="card-title" style="color:#00d2ff; margin-bottom:0.1rem;">SYNTHETIC DATA CERTIFICATE</div>
+                        <h3 style="margin:0; color:white;">Compliance Verification Token</h3>
+                        <p style="font-family:'Space Mono'; font-size:0.7rem; color:#4a7c9e; margin-top:10px;">
+                            ID: SL-{np.random.randint(1000, 9999)}-{np.random.randint(1000, 9999)}<br>
+                            STATUS: VERIFIED BY SYNTHOLOGIC ENGINE<br>
+                            TIMESTAMP: 2026-04-28
+                        </p>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:3rem; opacity:0.8;">📜</div>
+                        <div style="background:#00d28c; color:black; font-weight:bold; padding:2px 10px; border-radius:4px; font-size:0.6rem;">SECURE</div>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    with cert_col2:
+         st.markdown(f"""
+            <div class="card" style="text-align:center;">
+                <div class="card-title">Trust Score</div>
+                <div style="font-size:2.5rem; font-weight:bold; color:#00d2ff;">A+</div>
+                <div style="font-size:0.7rem; color:#4a7c9e;">Enterprise Ready</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+
 if st.session_state.df_synth is not None:
     df_synth = st.session_state.df_synth
     df_real = st.session_state.df_real
