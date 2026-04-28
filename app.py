@@ -659,13 +659,15 @@ if gen_btn and st.session_state.df_real is not None:
 
         df_synth = generate_synthetic(df_work, n_rows=n_rows)
         # Step B: Stress-Testing (Adversarial Injection)
+        # Step B: Stress-Testing (Adversarial Injection) - RECTIFIED
         if stress_test:
-            n_outliers = int(len(df_synth) * 0.15) # 15% mushkil data
+            n_outliers = int(len(df_synth) * 0.15)
             outlier_indices = np.random.choice(df_synth.index, n_outliers, replace=False)
+            
             for col in df_synth.select_dtypes(include=[np.number]).columns:
-                # Data ko intentionally extreme banana
+                # Critical Fix: Convert column to float before multiplying with decimals
+                df_synth[col] = df_synth[col].astype(float) 
                 df_synth.loc[outlier_indices, col] *= np.random.uniform(5, 10)
-        
         st.session_state.df_synth = df_synth
         
         # Fidelity Score Calculate karna (90-98 ke darmiyan random abhi ke liye)
