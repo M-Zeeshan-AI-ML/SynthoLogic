@@ -611,7 +611,7 @@ df_ref = st.session_state.df_real
 if df_ref is not None:
         actual_rows = len(df_ref)
         n_rows_default = min(actual_rows, 100000) 
-    else:
+else:
         n_rows_default = 100
 
     n_rows = st.number_input(
