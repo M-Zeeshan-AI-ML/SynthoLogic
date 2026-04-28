@@ -48,6 +48,27 @@ html, body, [data-testid="stAppViewContainer"] {
 [data-testid="stSidebar"] { background: #0d1420 !important; }
 section[data-testid="stMain"] > div { padding-top: 0 !important; }
 
+/* --- SynthoLogic Blue Theme (Labels & Inputs) --- */
+
+/* 1. Input label color (Synthetic rows to generate) */
+.stWidgetLabel p {
+    color: #00d2ff !important;
+}
+
+/* 2. Checkbox label color */
+.stCheckbox label p {
+    color: #00d2ff !important;
+}
+
+/* 3. Input field ke andar ka number/text */
+input {
+    color: #00d2ff !important;
+}
+
+/* 4. Checkbox ka dabba blue border ke saath */
+div[data-baseweb="checkbox"] div {
+    border-color: #00d2ff !important;
+}
 /* New feature badge */
 .new-feature-badge {
     background: linear-gradient(90deg, #ff00c1, #00d2ff);
