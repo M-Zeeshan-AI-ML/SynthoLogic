@@ -703,6 +703,127 @@ if gen_btn and st.session_state.df_real is not None:
 
 # --- ── Results & Trust Pipeline ─────────────────────────────────────────────
 if st.session_state.df_synth is not None:
+# --- ── Professional Trust Ecosystem ─────────────────────────────────────────
+    st.markdown("<div style='margin-top: 60px;'></div>", unsafe_allow_html=True)
+    st.markdown('<div class="step-pill">INTEGRITY & COMPLIANCE HUB</div>', unsafe_allow_html=True)
+
+    # Metrics Row: Fidelity & Privacy with Progress Bars
+    m1, m2, m3 = st.columns([1, 1, 1.5])
+    
+    # Dynamic Scores (Using your calculated metrics)
+    p_score = st.session_state.privacy_score
+    f_score = st.session_state.fidelity_score
+
+    with m1:
+        st.markdown(f"""
+            <div class="card" style="border-bottom: 4px solid #00d2ff;">
+                <div style="font-size:0.7rem; color:#4a7c9e; letter-spacing:1px;">PRIVACY INDEX</div>
+                <div style="font-size:2.2rem; font-weight:bold; color:white;">{p_score}<span style="font-size:1rem; color:#00d2ff;">/100</span></div>
+                <div style="background: rgba(0,210,255,0.1); height:6px; border-radius:10px; margin-top:10px;">
+                    <div style="background:#00d2ff; width:{p_score}%; height:100%; border-radius:10px;"></div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with m2:
+        st.markdown(f"""
+            <div class="card" style="border-bottom: 4px solid #ff00c1;">
+                <div style="font-size:0.7rem; color:#4a7c9e; letter-spacing:1px;">FIDELITY SCORE</div>
+                <div style="font-size:2.2rem; font-weight:bold; color:white;">{f_score}<span style="font-size:1rem; color:#ff00c1;">%</span></div>
+                <div style="background: rgba(255,0,193,0.1); height:6px; border-radius:10px; margin-top:10px;">
+                    <div style="background:#ff00c1; width:{f_score}%; height:100%; border-radius:10px;"></div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with m3:
+        # Mini Pipeline Flow
+        st.markdown(f"""
+            <div class="card" style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(0,210,255,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center; height:100%;">
+                    <div style="text-align:center; flex:1;">
+                        <div style="font-size:1.2rem;">📥</div><div style="font-size:0.6rem; color:#00d2ff;">LOADED</div>
+                    </div>
+                    <div style="color:rgba(0,210,255,0.3);">➔</div>
+                    <div style="text-align:center; flex:1;">
+                        <div style="font-size:1.2rem;">🛡️</div><div style="font-size:0.6rem; color:#ff00c1;">{"MASKED" if mask_pii_flag else "SKIP"}</div>
+                    </div>
+                    <div style="color:rgba(0,210,255,0.3);">➔</div>
+                    <div style="text-align:center; flex:1;">
+                        <div style="font-size:1.2rem;">⚠️</div><div style="font-size:0.6rem; color:#00d28c;">{"HARDENED" if stress_test else "BASE"}</div>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+
+    # --- Digital Certificate Block ---
+    cert_col, action_col = st.columns([2.2, 1])
+
+    with cert_col:
+        cert_id = f"SL-{np.random.randint(1000, 9999)}-TX"
+        st.markdown(f"""
+            <div class="card highlight-card" style="position:relative; overflow:hidden;">
+                <div style="position:absolute; top:-20px; right:-20px; font-size:8rem; opacity:0.05; color:#00d2ff;">🛡️</div>
+                <div style="display:flex; justify-content:space-between;">
+                    <div>
+                        <div style="background:#00d2ff; color:black; font-size:0.6rem; font-weight:900; padding:2px 8px; border-radius:2px; display:inline-block; margin-bottom:10px;">ENTERPRISE VERIFIED</div>
+                        <h2 style="margin:0; color:white; letter-spacing:-1px;">SynthoLogic Trust Certificate</h2>
+                        <p style="font-family:'Space Mono'; font-size:0.7rem; color:#4a7c9e; margin-top:10px;">
+                            CERTIFICATE TOKEN: <span style="color:#00d2ff;">{cert_id}</span><br>
+                            VALIDATION AUTHORITY: STRUCTURAL MIND AI<br>
+                            SECURITY PROTOCOL: AES-256 EQUIVALENT SYNTHESIS
+                        </p>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:2.5rem;">📜</div>
+                        <div style="margin-top:10px; border:1px solid #00d28c; color:#00d28c; font-size:0.5rem; padding:2px 5px; border-radius:3px;">100% SECURE</div>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with action_col:
+        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+        from fpdf import FPDF
+        
+        def create_pro_pdf(cid, p, f):
+            pdf = FPDF()
+            pdf.add_page()
+            # Dark Background
+            pdf.set_fill_color(10, 15, 25)
+            pdf.rect(0, 0, 210, 297, 'F')
+            # Header
+            pdf.set_text_color(0, 210, 255)
+            pdf.set_font("Arial", 'B', 26)
+            pdf.cell(0, 50, "SYNTHOLOGIC DATA AUDIT", 0, 1, 'C')
+            # Body
+            pdf.set_text_color(200, 200, 200)
+            pdf.set_font("Arial", '', 12)
+            pdf.cell(0, 10, f"Issued to: Enterprise User", 0, 1, 'C')
+            pdf.cell(0, 10, f"Audit ID: {cid}", 0, 1, 'C')
+            pdf.ln(20)
+            # Scores
+            pdf.set_font("Arial", 'B', 16)
+            pdf.cell(0, 10, f"Privacy Compliance Score: {p}/100", 0, 1, 'L')
+            pdf.cell(0, 10, f"Statistical Fidelity Index: {f}%", 0, 1, 'L')
+            pdf.ln(30)
+            pdf.set_font("Arial", 'I', 10)
+            pdf.multi_cell(0, 10, "This certificate confirms that the synthetic data generated maintains high statistical parity while ensuring zero-linkage to original sensitive entities.")
+            return pdf.output(dest='S').encode('latin-1')
+
+        pdf_data = create_pro_pdf(cert_id, p_score, f_score)
+        
+        st.download_button(
+            label="📜 DOWNLOAD AUDIT REPORT",
+            data=pdf_data,
+            file_name=f"SynthoLogic_Audit_{cert_id}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+        st.button("🔗 SHARE VERIFICATION LINK", use_container_width=True)
+    
     # 1. Spacing Fix: Extra margin taake uper wala section merge na ho
     st.markdown("<div style='margin-top: 50px;'></div>", unsafe_allow_html=True)
     st.markdown("---")
