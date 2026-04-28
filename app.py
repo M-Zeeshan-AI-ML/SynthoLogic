@@ -291,17 +291,17 @@ section[data-testid="stMain"] > div { padding-top: 0 !important; }
 ::-webkit-scrollbar-track { background: #080c14; }
 ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 3px; }
 
-/* --- SynthoLogic Signature Blue & Bold Checks --- */
+/* --- SynthoLogic Signature Blue Color (No Bold) --- */
 .stCheckbox label p {
-    font-weight: 900 !important;
-    font-size: 1.1rem !important;
-    color: #00d2ff !important;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-weight: normal !important; /* Bold khatam */
+    font-size: 1rem !important;    /* Normal size */
+    color: #00d2ff !important;    /* Sirf color change */
 }
-/* Checkbox ke dabbe ka color */
+
+/* Checkbox ke dabbe ka border color */
 div[data-baseweb="checkbox"] div {
     border-color: #00d2ff !important;
+}
 }
 
 </style>
