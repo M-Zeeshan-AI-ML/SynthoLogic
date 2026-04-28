@@ -304,6 +304,30 @@ div[data-baseweb="checkbox"] div {
 }
 }
 
+/* --- SynthoLogic Blue Labels & Captions --- */
+
+/* 1. Input fields ke upar jo label hota hai (e.g., Synthetic rows to generate) */
+.stWidgetLabel p {
+    color: #00d2ff !important;
+}
+
+/* 2. Checkbox ke labels ka color */
+.stCheckbox label p {
+    color: #00d2ff !important;
+    font-weight: normal !important;
+}
+
+/* 3. Small help/caption text agar use kiya hai */
+.stCaption p {
+    color: #00d2ff !important;
+    opacity: 0.8;
+}
+
+/* 4. Checkbox ke box ka border */
+div[data-baseweb="checkbox"] div {
+    border-color: #00d2ff !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
