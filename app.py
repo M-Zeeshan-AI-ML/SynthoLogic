@@ -5,6 +5,24 @@ import io
 import re
 import warnings
 warnings.filterwarnings("ignore")
+# ── Add this inside your existing <style> tag ──
+    .new-feature-badge {
+        background: linear-gradient(90deg, #ff00c1, #00d2ff);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.65rem;
+        font-weight: bold;
+        margin-left: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .highlight-card {
+        background: #111927;
+        border: 1px solid #00d2ff !important;
+        box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
+    }
 
 # ── Initialize Session State ──────────────────────────────────────────────────
 if 'df_real' not in st.session_state:
@@ -688,12 +706,13 @@ if gen_btn and st.session_state.df_real is not None:
 
 # ── Results ───────────────────────────────────────────────────────────────────
 if st.session_state.df_synth is not None:
-    df_real = st.session_state.df_real
-    df_synth = st.session_state.df_synth
-    score = st.session_state.privacy_score
-
-    st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-    st.markdown('<div class="step-pill">STEP 03 · RESULTS & EXPORT</div>', unsafe_allow_html=True)
+    with c2: # Fidelity Score Card
+    st.markdown(f"""
+        <div class="card highlight-card" style="padding:10px; text-align:center">
+            <div class="card-title" style="font-size:10px">Fidelity <span class="new-feature-badge">New</span></div>
+            <div class="score-number" style="font-size:2rem; color:#00d2ff">{st.session_state.get('fidelity_score', 95)}%</div>
+        </div>
+    """, unsafe_allow_html=True)
 
     # ── Privacy Score + Download ──────────────────────────────────────────────
     col_score, col_dl = st.columns([1, 2], gap="large")
