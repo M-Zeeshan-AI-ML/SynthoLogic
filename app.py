@@ -7,7 +7,7 @@ import warnings
 warnings.filterwarnings("ignore")
 # ── Add this inside your existing <style> tag ──
 .new-feature-badge {
-        background: linear-gradient(90deg, #ff00c1, #00d2ff);
+background: linear-gradient(90deg, #ff00c1, #00d2ff);
         color: white;
         padding: 2px 8px;
         border-radius: 4px;
