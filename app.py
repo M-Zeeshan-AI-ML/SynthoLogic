@@ -4,6 +4,7 @@ import numpy as np
 import io
 import re
 import warnings
+pip install fpdf
 warnings.filterwarnings("ignore")
 
 # ── Initialize Session State ──────────────────────────────────────────────────
@@ -701,76 +702,106 @@ if gen_btn and st.session_state.df_real is not None:
 
 # ── Results ───────────────────────────────────────────────────────────────────
 
-# --- ── Process Pipeline & Trust Vault ────────────────────────────────────────
+# --- ── Results & Trust Pipeline ─────────────────────────────────────────────
 if st.session_state.df_synth is not None:
+    # 1. Spacing Fix: Extra margin taake uper wala section merge na ho
+    st.markdown("<div style='margin-top: 50px;'></div>", unsafe_allow_html=True)
     st.markdown("---")
     st.markdown('<div class="step-pill">SYSTEM PIPELINE & TRUST VAULT</div>', unsafe_allow_html=True)
     
-    # 3 Columns for the Flow
-    pipe_col1, pipe_col2, pipe_col3 = st.columns(3)
+    # Pipeline Flow Cards
+    p_col1, p_col2, p_col3 = st.columns(3)
     
-    with pipe_col1:
-        st.markdown(f"""
-            <div class="card" style="text-align:center; border-left: 4px solid #00d2ff;">
-                <div style="font-size:1.5rem;">📥</div>
-                <div class="card-title" style="margin-bottom:5px;">Ingestion</div>
-                <div style="font-size:0.8rem; color:#e2e8f0;">Data Uploaded & Scanned</div>
-                <div style="color:#00d2ff; font-weight:bold; font-size:0.7rem; margin-top:5px;">● COMPLETED</div>
+    with p_col1:
+        st.markdown("""
+            <div class="card" style="text-align:center; border-top: 3px solid #00d2ff; min-height: 150px;">
+                <div style="font-size:1.8rem; margin-bottom:10px;">📥</div>
+                <div class="card-title">INGESTION</div>
+                <p style="font-size:0.75rem; color:#8ba3bc;">Data Scan & Load Complete</p>
+                <div style="color:#00d2ff; font-weight:bold; font-size:0.65rem;">STATUS: COMPLETED</div>
             </div>
         """, unsafe_allow_html=True)
 
-    with pipe_col2:
-        mask_status = "ACTIVE" if mask_pii_flag else "BYPASSED"
-        mask_icon = "🛡️" if mask_pii_flag else "⚪"
+    with p_col2:
+        mask_status = "ACTIVE" if mask_pii_flag else "DISABLED"
         st.markdown(f"""
-            <div class="card" style="text-align:center; border-left: 4px solid #ff00c1;">
-                <div style="font-size:1.5rem;">{mask_icon}</div>
-                <div class="card-title" style="margin-bottom:5px;">Privacy Layer</div>
-                <div style="font-size:0.8rem; color:#e2e8f0;">PII Masking & Redaction</div>
-                <div style="color:#ff00c1; font-weight:bold; font-size:0.7rem; margin-top:5px;">● {mask_status}</div>
+            <div class="card" style="text-align:center; border-top: 3px solid #ff00c1; min-height: 150px;">
+                <div style="font-size:1.8rem; margin-bottom:10px;">🛡️</div>
+                <div class="card-title">PRIVACY LAYER</div>
+                <p style="font-size:0.75rem; color:#8ba3bc;">PII Redaction & Masking</p>
+                <div style="color:#ff00c1; font-weight:bold; font-size:0.65rem;">STATUS: {mask_status}</div>
             </div>
         """, unsafe_allow_html=True)
 
-    with pipe_col3:
+    with p_col3:
         stress_status = "HARDENED" if stress_test else "STANDARD"
-        stress_icon = "⚠️" if stress_test else "⚡"
         st.markdown(f"""
-            <div class="card" style="text-align:center; border-left: 4px solid #00d28c;">
-                <div style="font-size:1.5rem;">{stress_icon}</div>
-                <div class="card-title" style="margin-bottom:5px;">Stress Engine</div>
-                <div style="font-size:0.8rem; color:#e2e8f0;">Adversarial Pattern Injection</div>
-                <div style="color:#00d28c; font-weight:bold; font-size:0.7rem; margin-top:5px;">● {stress_status}</div>
+            <div class="card" style="text-align:center; border-top: 3px solid #00d28c; min-height: 150px;">
+                <div style="font-size:1.8rem; margin-bottom:10px;">⚠️</div>
+                <div class="card-title">STRESS ENGINE</div>
+                <p style="font-size:0.75rem; color:#8ba3bc;">Adversarial Safety Injection</p>
+                <div style="color:#00d28c; font-weight:bold; font-size:0.65rem;">STATUS: {stress_status}</div>
             </div>
         """, unsafe_allow_html=True)
 
-    # --- Digital Certificate Section ---
-    st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
-    
-    cert_col1, cert_col2 = st.columns([2, 1])
-    
-    with cert_col1:
+    # 2. Spacing for Certificate
+    st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
+
+    # --- Digital Certificate & PDF Logic ---
+    cert_col, download_col = st.columns([2, 1])
+
+    with cert_col:
+        cert_id = f"SL-{np.random.randint(1000, 9999)}-TX"
         st.markdown(f"""
-            <div class="card highlight-card" style="background: linear-gradient(145deg, #0d1420, #111927);">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="card highlight-card">
+                <div style="display:flex; justify-content:space-between;">
                     <div>
-                        <div class="card-title" style="color:#00d2ff; margin-bottom:0.1rem;">SYNTHETIC DATA CERTIFICATE</div>
-                        <h3 style="margin:0; color:white;">Compliance Verification Token</h3>
-                        <p style="font-family:'Space Mono'; font-size:0.7rem; color:#4a7c9e; margin-top:10px;">
-                            ID: SL-{np.random.randint(1000, 9999)}-{np.random.randint(1000, 9999)}<br>
-                            STATUS: VERIFIED BY SYNTHOLOGIC ENGINE<br>
-                            TIMESTAMP: 2026-04-28
+                        <div class="card-title" style="color:#00d2ff;">COMPLIANCE VERIFIED</div>
+                        <h2 style="margin:5px 0; color:white;">SynthoLogic Trust Certificate</h2>
+                        <p style="font-family:'Space Mono'; font-size:0.7rem; color:#4a7c9e;">
+                            CERTIFICATE ID: {cert_id}<br>
+                            ENGINE VERSION: v2.4 (Structural Mind)<br>
+                            DATA INTEGRITY: VERIFIED
                         </p>
                     </div>
-                    <div style="text-align:right;">
-                        <div style="font-size:3rem; opacity:0.8;">📜</div>
-                        <div style="background:#00d28c; color:black; font-weight:bold; padding:2px 10px; border-radius:4px; font-size:0.6rem;">SECURE</div>
+                    <div style="text-align:center;">
+                        <div style="font-size:3rem;">📜</div>
+                        <div style="background:#00d28c; color:black; font-weight:bold; font-size:0.6rem; padding:2px 5px; border-radius:3px;">SECURE</div>
                     </div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
 
+    with download_col:
+        st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+        # Placeholder for PDF Logic
+        from fpdf import FPDF
+        
+        def create_pdf(cid, p_score, f_score):
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_fill_color(8, 12, 20) # SynthoLogic Dark
+            pdf.rect(0, 0, 210, 297, 'F')
+            pdf.set_text_color(0, 210, 255)
+            pdf.set_font("Arial", 'B', 24)
+            pdf.cell(0, 40, "SynthoLogic Trust Certificate", 0, 1, 'C')
+            pdf.set_text_color(255, 255, 255)
+            pdf.set_font("Arial", '', 14)
+            pdf.cell(0, 10, f"Certificate ID: {cid}", 0, 1, 'C')
+            pdf.cell(0, 10, f"Privacy Score: {p_score}/100", 0, 1, 'C')
+            pdf.cell(0, 10, f"Fidelity Score: {f_score}%", 0, 1, 'C')
+            pdf.cell(0, 40, "Verified by Structural Mind Engine", 0, 1, 'C')
+            return pdf.output(dest='S').encode('latin-1')
 
-    
+        pdf_data = create_pdf(cert_id, st.session_state.privacy_score, st.session_state.fidelity_score)
+        
+        st.download_button(
+            label="📄 DOWNLOAD PDF CERTIFICATE",
+            data=pdf_data,
+            file_name="SynthoLogic_Verification.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
     
     with cert_col2:
          st.markdown(f"""
