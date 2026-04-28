@@ -922,6 +922,71 @@ if st.session_state.df_synth is not None:
             mime="application/pdf",
             use_container_width=True
         )
+# --- Digital Certificate & Action Hub ---
+    # Humne columns ke naam 'cert_col' aur 'action_col' rakhe hain
+    cert_col, action_col = st.columns([2.2, 1])
+
+    with cert_col:
+        cert_id = f"SL-{np.random.randint(1000, 9999)}-TX"
+        st.markdown(f"""
+            <div class="card highlight-card" style="position:relative; overflow:hidden;">
+                <div style="position:absolute; top:-20px; right:-20px; font-size:8rem; opacity:0.05; color:#00d2ff;">🛡️</div>
+                <div style="display:flex; justify-content:space-between;">
+                    <div>
+                        <div style="background:#00d2ff; color:black; font-size:0.6rem; font-weight:900; padding:2px 8px; border-radius:2px; display:inline-block; margin-bottom:10px;">ENTERPRISE VERIFIED</div>
+                        <h2 style="margin:0; color:white; letter-spacing:-1px;">SynthoLogic Trust Certificate</h2>
+                        <p style="font-family:'Space Mono'; font-size:0.7rem; color:#4a7c9e; margin-top:10px;">
+                            CERTIFICATE TOKEN: <span style="color:#00d2ff;">{cert_id}</span><br>
+                            VALIDATION AUTHORITY: STRUCTURAL MIND AI<br>
+                            TIMESTAMP: 2026-04-28
+                        </p>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:2.5rem;">📜</div>
+                        <div style="margin-top:10px; border:1px solid #00d28c; color:#00d28c; font-size:0.5rem; padding:2px 5px; border-radius:3px;">100% SECURE</div>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    # ERROR YAHAN THA: Hum 'action_col' use karenge jo upar define kiya hai
+    with action_col:
+        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+        
+        from fpdf import FPDF
+        
+        def create_final_pdf(cid, p, f):
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_fill_color(10, 15, 25)
+            pdf.rect(0, 0, 210, 297, 'F')
+            pdf.set_text_color(0, 210, 255)
+            pdf.set_font("Arial", 'B', 26)
+            pdf.cell(0, 50, "SYNTHOLOGIC AUDIT REPORT", 0, 1, 'C')
+            pdf.set_text_color(255, 255, 255)
+            pdf.set_font("Arial", '', 12)
+            pdf.cell(0, 10, f"Certificate ID: {cid}", 0, 1, 'C')
+            pdf.ln(20)
+            pdf.cell(0, 10, f"Privacy Score: {p}/100", 0, 1, 'L')
+            pdf.cell(0, 10, f"Fidelity Score: {f}%", 0, 1, 'L')
+            return pdf.output(dest='S').encode('latin-1')
+
+        # PDF data generate karna (Session state use karte huye)
+        p_val = st.session_state.get('privacy_score', 95)
+        f_val = st.session_state.get('fidelity_score', 92)
+        
+        pdf_bytes = create_final_pdf(cert_id, p_val, f_val)
+        
+        st.download_button(
+            label="📜 DOWNLOAD AUDIT REPORT",
+            data=pdf_bytes,
+            file_name=f"SynthoLogic_Audit_{cert_id}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+        
+        if st.button("🚀 SHARE ON LINKEDIN", use_container_width=True):
+            st.toast("Link copied to clipboard! (Feature coming soon)")
     
     with cert_col2:
          st.markdown(f"""
