@@ -4,7 +4,6 @@ import numpy as np
 import io
 import re
 import warnings
-pip install fpdf
 warnings.filterwarnings("ignore")
 
 # ── Initialize Session State ──────────────────────────────────────────────────
