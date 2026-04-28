@@ -768,6 +768,9 @@ if st.session_state.df_synth is not None:
                 </div>
             </div>
         """, unsafe_allow_html=True)
+
+
+    
     
     with cert_col2:
          st.markdown(f"""
