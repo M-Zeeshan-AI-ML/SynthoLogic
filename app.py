@@ -290,6 +290,20 @@ section[data-testid="stMain"] > div { padding-top: 0 !important; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #080c14; }
 ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 3px; }
+
+/* --- SynthoLogic Signature Blue & Bold Checks --- */
+.stCheckbox label p {
+    font-weight: 900 !important;
+    font-size: 1.1rem !important;
+    color: #00d2ff !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+/* Checkbox ke dabbe ka color */
+div[data-baseweb="checkbox"] div {
+    border-color: #00d2ff !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
