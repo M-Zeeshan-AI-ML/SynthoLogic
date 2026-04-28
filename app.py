@@ -608,7 +608,7 @@ with col_cfg:
 
 df_ref = st.session_state.df_real
     # Default rows ya toh file ki total rows hongi, ya max 100,000
-    if df_ref is not None:
+if df_ref is not None:
         actual_rows = len(df_ref)
         n_rows_default = min(actual_rows, 100000) 
     else:
