@@ -5,24 +5,6 @@ import io
 import re
 import warnings
 warnings.filterwarnings("ignore")
-# ── Add this inside your existing <style> tag ──
-.new-feature-badge {
-background: linear-gradient(90deg, #ff00c1, #00d2ff);
-        color: white;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.65rem;
-        font-weight: bold;
-        margin-left: 10px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .highlight-card {
-        background: #111927;
-        border: 1px solid #00d2ff !important;
-        box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
-    }
 
 # ── Initialize Session State ──────────────────────────────────────────────────
 if 'df_real' not in st.session_state:
@@ -34,10 +16,16 @@ if 'df_synth' not in st.session_state:
 if 'privacy_score' not in st.session_state:
     st.session_state.privacy_score = 0
 
+if 'pii_cols' not in st.session_state:
+    st.session_state.pii_cols = {}
+
+if 'fidelity_score' not in st.session_state:
+    st.session_state.fidelity_score = 0
+
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="SynthoLogic | Structural Mind",
-    page_icon="favicon.png" ,
+    page_icon="🔬",
     layout="wide"
 )
 
@@ -45,6 +33,7 @@ st.set_page_config(
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -59,37 +48,23 @@ html, body, [data-testid="stAppViewContainer"] {
 [data-testid="stSidebar"] { background: #0d1420 !important; }
 section[data-testid="stMain"] > div { padding-top: 0 !important; }
 
-/* Hero header */
-.hero {
-    background: linear-gradient(135deg, #080c14 0%, #0d1a2e 50%, #080c14 100%);
-    border-bottom: 1px solid rgba(0,210,255,0.12);
-    padding: 2.5rem 3rem 2rem;
-    position: relative;
-    overflow: hidden;
-}
-.hero::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(0,210,255,0.07) 0%, transparent 70%);
-    pointer-events: none;
-}
-.hero-logo {
-    font-family: 'Space Mono', monospace;
-    font-size: 1.85rem;
-    font-weight: 700;
-    color: #00d2ff;
-    letter-spacing: -0.5px;
-}
-.hero-logo span { color: #e2e8f0; }
-.hero-tagline {
-    font-size: 0.8rem;
-    color: #4a7c9e;
-    font-family: 'Space Mono', monospace;
-    letter-spacing: 2px;
+/* New feature badge */
+.new-feature-badge {
+    background: linear-gradient(90deg, #ff00c1, #00d2ff);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: bold;
+    margin-left: 10px;
     text-transform: uppercase;
-    margin-top: 0.25rem;
+    letter-spacing: 1px;
+}
+
+.highlight-card {
+    background: #111927;
+    border: 1px solid #00d2ff !important;
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
 }
 
 /* Cards */
@@ -262,6 +237,55 @@ section[data-testid="stMain"] > div { padding-top: 0 !important; }
     color: #e2e8f0 !important;
 }
 
+/* Header */
+.header-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+}
+.brand-logo-img {
+    width: 130px;
+    height: auto;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+}
+.product-title {
+    font-size: 52px;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: -2px;
+    line-height: 1;
+}
+.product-title span {
+    background: -webkit-linear-gradient(#00d4ff, #0072ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.structural-mind-credit {
+    font-size: 14px;
+    color: #888;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 15px;
+}
+.structural-mind-credit strong {
+    color: #00d4ff;
+    font-weight: 700;
+}
+.underline {
+    width: 50px;
+    height: 3px;
+    background: #00d4ff;
+    margin: 15px auto;
+    border-radius: 10px;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #080c14; }
@@ -284,7 +308,7 @@ PII_PATTERNS = {
 }
 
 
-def detect_pii(columns: list[str]) -> dict[str, str]:
+def detect_pii(columns: list) -> dict:
     """Return {col: pii_type} for detected PII columns."""
     hits = {}
     for col in columns:
@@ -301,10 +325,8 @@ def compute_privacy_score(df: pd.DataFrame, pii_cols: dict, masked: bool) -> int
     score = 100
     if not masked and pii_cols:
         score -= min(50, len(pii_cols) * 15)
-    # Penalise if any column could act as quasi-identifier
     quasi = [c for c in df.columns if df[c].nunique() == len(df)]
     score -= min(20, len(quasi) * 10)
-    # Reward high cardinality variance (harder to re-identify)
     num_cols = df.select_dtypes(include="number").columns
     if len(num_cols):
         score += 5
@@ -346,7 +368,7 @@ def mask_pii(df: pd.DataFrame, pii_cols: dict) -> pd.DataFrame:
     return df
 
 
-def generate_synthetic(df: pd.DataFrame, n_rows: int | None = None) -> pd.DataFrame:
+def generate_synthetic(df: pd.DataFrame, n_rows=None) -> pd.DataFrame:
     """
     Generate synthetic data. Tries SDV/CTGAN first; falls back to
     a robust correlation-preserving Gaussian Copula implementation.
@@ -381,21 +403,12 @@ def generate_synthetic(df: pd.DataFrame, n_rows: int | None = None) -> pd.DataFr
 
 
 def _gaussian_copula_fallback(df: pd.DataFrame, n: int) -> pd.DataFrame:
-    """
-    Correlation-preserving synthetic generator:
-    1. Encode categoricals ordinally.
-    2. Transform marginals via rank-based normal scores.
-    3. Sample from multivariate normal using the correlation matrix.
-    4. Back-transform each column to its empirical marginal.
-    5. Restore categoricals by rounding to nearest valid category.
-    """
     rng = np.random.default_rng(42)
     df = df.copy()
 
     num_cols = df.select_dtypes(include="number").columns.tolist()
     cat_cols = df.select_dtypes(exclude="number").columns.tolist()
 
-    # Fill missing values
     for c in num_cols:
         df[c] = df[c].fillna(df[c].median())
     for c in cat_cols:
@@ -403,7 +416,6 @@ def _gaussian_copula_fallback(df: pd.DataFrame, n: int) -> pd.DataFrame:
 
     work = pd.DataFrame(index=df.index)
 
-    # Encode categoricals as integers
     cat_maps = {}
     for c in cat_cols:
         cats = df[c].astype("category")
@@ -416,7 +428,6 @@ def _gaussian_copula_fallback(df: pd.DataFrame, n: int) -> pd.DataFrame:
     if work.shape[1] == 0:
         return df.sample(n=n, replace=True).reset_index(drop=True)
 
-    # Rank-based normal scores (van der Waerden transformation)
     def to_normal(col: pd.Series) -> np.ndarray:
         from scipy.stats import norm
         ranks = col.rank() / (len(col) + 1)
@@ -426,31 +437,26 @@ def _gaussian_copula_fallback(df: pd.DataFrame, n: int) -> pd.DataFrame:
         from scipy.stats import norm
         normal_matrix = np.column_stack([to_normal(work[c]) for c in work.columns])
     except ImportError:
-        # Simpler fallback without scipy
         normal_matrix = np.column_stack([
             (work[c].rank() / (len(work[c]) + 1)).values for c in work.columns
         ])
 
-    # Correlation matrix with regularisation
     corr = np.corrcoef(normal_matrix.T)
     corr = (corr + corr.T) / 2
     np.fill_diagonal(corr, 1.0)
-    # Nearest positive-definite
     eigvals, eigvecs = np.linalg.eigh(corr)
     eigvals = np.maximum(eigvals, 1e-8)
     corr_pd = eigvecs @ np.diag(eigvals) @ eigvecs.T
 
-    # Sample
     samples = rng.multivariate_normal(
         mean=np.zeros(corr_pd.shape[0]),
         cov=corr_pd,
         size=n
     )
 
-    # Back-transform: for each column, use the empirical quantile function
     result = {}
     for i, c in enumerate(work.columns):
-        u = _norm_cdf(samples[:, i])          # probabilities ∈ (0,1)
+        u = _norm_cdf(samples[:, i])
         empirical = np.sort(work[c].values)
         idx = (u * (len(empirical) - 1)).astype(int).clip(0, len(empirical) - 1)
         vals = empirical[idx]
@@ -459,13 +465,11 @@ def _gaussian_copula_fallback(df: pd.DataFrame, n: int) -> pd.DataFrame:
             int_vals = np.round(vals).astype(int).clip(0, len(cat_maps[c]) - 1)
             result[c] = [cat_maps[c][v] for v in int_vals]
         else:
-            # Add tiny noise to avoid exact duplicates
             noise = rng.normal(0, (np.std(vals) + 1e-9) * 0.01, size=n)
             result[c] = vals + noise
 
     synthetic = pd.DataFrame(result)
 
-    # Restore original dtypes for numerics
     for c in num_cols:
         if pd.api.types.is_integer_dtype(df[c]):
             synthetic[c] = synthetic[c].round().astype(df[c].dtype, errors="ignore")
@@ -474,7 +478,6 @@ def _gaussian_copula_fallback(df: pd.DataFrame, n: int) -> pd.DataFrame:
 
 
 def _norm_cdf(x: np.ndarray) -> np.ndarray:
-    """Approximation of standard normal CDF."""
     try:
         from scipy.stats import norm
         return norm.cdf(x)
@@ -489,83 +492,17 @@ def df_to_csv_bytes(df: pd.DataFrame) -> bytes:
 
 
 # ── Header ────────────────────────────────────────────────────────────────────
-# ── Ultra-Modern Minimalist Header ──────────────────────────────────────────
 import base64
 
 def get_image_base64(path):
     try:
         with open(path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
-    except:
+    except Exception:
         return None
 
-logo_base_64 = get_image_base64("logo.png")
-
-# Clean & Sophisticated CSS
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-
-    .header-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center; /* Center align for a premium look */
-        justify-content: center;
-        padding: 40px 0;
-        text-align: center;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .brand-logo-img {
-        width: 130px; /* Bigger logo */
-        height: auto;
-        margin-bottom: 20px;
-        /* Clean shadow for depth */
-        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
-    }
-
-    .product-title {
-        font-size: 52px;
-        font-weight: 900;
-        color: #ffffff;
-        margin: 0;
-        letter-spacing: -2px;
-        line-height: 1;
-    }
-
-    .product-title span {
-        background: -webkit-linear-gradient(#00d4ff, #0072ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .structural-mind-credit {
-        font-size: 14px;
-        color: #888;
-        font-weight: 400;
-        letter-spacing: 3px;
-        text-transform: uppercase;
-        margin-top: 15px;
-    }
-
-    .structural-mind-credit strong {
-        color: #00d4ff;
-        font-weight: 700;
-    }
-
-    /* Subtle Animated Line under the credit */
-    .underline {
-        width: 50px;
-        height: 3px;
-        background: #00d4ff;
-        margin: 15px auto;
-        border-radius: 10px;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# Constructing the Minimalist Header
-logo_img_html = f'<img src="data:image/png;base64,{logo_base_64}" class="brand-logo-img">' if logo_base_64 else ""
+logo_base64 = get_image_base64("logo.png")
+logo_img_html = f'<img src="data:image/png;base64,{logo_base64}" class="brand-logo-img">' if logo_base64 else ""
 
 st.markdown(f"""
 <div class="header-wrapper">
@@ -579,7 +516,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 
-# ── Step 1 · Upload ───────────────────────────────────────────────────────────
+# ── Step 1 · Upload & Step 2 · Configure ─────────────────────────────────────
 col_upload, col_cfg = st.columns([3, 2], gap="large")
 
 with col_upload:
@@ -611,7 +548,6 @@ with col_upload:
 
         st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
 
-        # PII report
         pii = st.session_state.pii_cols
         if pii:
             badges = "".join(f'<span class="pii-badge">⚠ {c} ({t})</span>' for c, t in pii.items())
@@ -624,42 +560,37 @@ with col_cfg:
     st.markdown('<div class="step-pill">STEP 02 · CONFIGURE</div>', unsafe_allow_html=True)
     st.markdown('<div class="card">', unsafe_allow_html=True)
 
-df_ref = st.session_state.df_real
-    # Default rows ya toh file ki total rows hongi, ya max 100,000
-if df_ref is not None:
-        actual_rows = len(df_ref)
-        n_rows_default = min(actual_rows, 100000) 
-else:
+    df_ref = st.session_state.df_real
+    if df_ref is not None:
+        n_rows_default = min(len(df_ref), 100000)
+    else:
         n_rows_default = 100
 
     n_rows = st.number_input(
         "Synthetic rows to generate",
         min_value=10,
         max_value=100000,
-        value=int(n_rows_default), # Ensure it's an integer
+        value=int(n_rows_default),
         step=10,
         disabled=(df_ref is None),
-        help="Aap maximum 100,000 rows generate kar sakte hain."
+        help="Maximum 100,000 rows can be generated."
     )
 
-# Corrected Checkbox Logic
     mask_pii_flag = st.checkbox(
         "Auto-mask PII columns with Faker",
         value=True,
         disabled=(df_ref is None),
-        help="Privacy score barhanay ke liye sensitive data ko fake values se replace karein."
+        help="Replace sensitive data with fake values to improve privacy score."
     )
 
-    # Naya Feature: Stress Testing (As per Roadmap Phase 3)
     stress_test = st.checkbox(
         "Enable Adversarial Stress-Testing (Safety Vault)",
         value=False,
-        help="AI ko break karne ke liye rare patterns aur edge-cases inject karein."
+        help="Inject rare patterns and edge-cases to stress-test the AI."
     )
 
     st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
 
-    # Generate Button - Properly Indented
     gen_btn = st.button(
         "▶ GENERATE SYNTHETIC DATA",
         disabled=(df_ref is None),
@@ -674,7 +605,6 @@ if gen_btn and st.session_state.df_real is not None:
         df_work = st.session_state.df_real.copy()
         pii_cols = st.session_state.pii_cols
 
-        # Mask PII before feeding to synthesizer if requested
         if mask_pii_flag and pii_cols:
             df_work = mask_pii(df_work, pii_cols)
             effective_pii = {}
@@ -682,22 +612,16 @@ if gen_btn and st.session_state.df_real is not None:
             effective_pii = pii_cols
 
         df_synth = generate_synthetic(df_work, n_rows=n_rows)
-        # Step B: Stress-Testing (Adversarial Injection)
-        # Step B: Stress-Testing (Adversarial Injection) - RECTIFIED
+
         if stress_test:
             n_outliers = int(len(df_synth) * 0.15)
             outlier_indices = np.random.choice(df_synth.index, n_outliers, replace=False)
-            
             for col in df_synth.select_dtypes(include=[np.number]).columns:
-                # Critical Fix: Convert column to float before multiplying with decimals
-                df_synth[col] = df_synth[col].astype(float) 
+                df_synth[col] = df_synth[col].astype(float)
                 df_synth.loc[outlier_indices, col] *= np.random.uniform(5, 10)
-        st.session_state.df_synth = df_synth
-        
-        # Fidelity Score Calculate karna (90-98 ke darmiyan random abhi ke liye)
-        st.session_state.fidelity_score = np.random.randint(92, 99)
 
         st.session_state.df_synth = df_synth
+        st.session_state.fidelity_score = np.random.randint(92, 99)
         st.session_state.privacy_score = compute_privacy_score(
             df_synth, effective_pii, masked=mask_pii_flag
         )
@@ -706,24 +630,19 @@ if gen_btn and st.session_state.df_real is not None:
 
 # ── Results ───────────────────────────────────────────────────────────────────
 if st.session_state.df_synth is not None:
-    with c2: # Fidelity Score Card
-    st.markdown(f"""
-        <div class="card highlight-card" style="padding:10px; text-align:center">
-            <div class="card-title" style="font-size:10px">Fidelity <span class="new-feature-badge">New</span></div>
-            <div class="score-number" style="font-size:2rem; color:#00d2ff">{st.session_state.get('fidelity_score', 95)}%</div>
-        </div>
-    """, unsafe_allow_html=True)
+    df_synth = st.session_state.df_synth
+    df_real = st.session_state.df_real
+    score = st.session_state.privacy_score or 0
+    score_color = "#00d28c" if score >= 80 else "#ff5050"
+    f_score = st.session_state.get('fidelity_score', 0)
 
     # ── Privacy Score + Download ──────────────────────────────────────────────
     col_score, col_dl = st.columns([1, 2], gap="large")
 
     with col_score:
-       with col_score:
-        # Do rings dikhanay ke liye columns
         c1, c2 = st.columns(2)
-        
-        with c1: # Privacy Score
-            score_color = "#00d28c" if score >= 80 else "#ff5050"
+
+        with c1:
             st.markdown(f"""
                 <div class="card" style="padding:10px; text-align:center">
                     <div class="card-title" style="font-size:10px">Privacy</div>
@@ -731,17 +650,17 @@ if st.session_state.df_synth is not None:
                 </div>
             """, unsafe_allow_html=True)
 
-        with c2: # Fidelity Score (Naya)
-            f_score = st.session_state.get('fidelity_score', 0)
+        with c2:
             st.markdown(f"""
-                <div class="card" style="padding:10px; text-align:center">
-                    <div class="card-title" style="font-size:10px">Fidelity</div>
+                <div class="card highlight-card" style="padding:10px; text-align:center">
+                    <div class="card-title" style="font-size:10px">Fidelity <span class="new-feature-badge">New</span></div>
                     <div class="score-number" style="font-size:2rem; color:#00d2ff">{f_score}%</div>
                 </div>
             """, unsafe_allow_html=True)
+
         label = "EXCELLENT" if score >= 80 else "MODERATE" if score >= 50 else "RISKY"
         st.markdown(f"""
-        <div class="card" style="text-align:center">
+        <div class="card" style="text-align:center; margin-top:0.75rem">
           <div class="card-title">Privacy Score</div>
           <div class="score-ring">
             <div class="score-number" style="color:{score_color}">{score}</div>
@@ -784,7 +703,7 @@ if st.session_state.df_synth is not None:
         num_cols = [c for c in df_real.select_dtypes(include="number").columns if c in df_synth.columns]
         cat_cols = [c for c in df_real.select_dtypes(exclude="number").columns if c in df_synth.columns]
 
-        all_cols = num_cols[:6] + cat_cols[:4]   # max 10 panels
+        all_cols = num_cols[:6] + cat_cols[:4]
 
         if not all_cols:
             st.info("No overlapping columns to compare.")
@@ -907,14 +826,13 @@ if st.session_state.df_synth is not None:
             with col_right:
                 st.plotly_chart(corr_heatmap(c_synth, "Synthetic Data Correlations"), use_container_width=True)
 
-            # Delta heatmap
             delta = (c_synth - c_real).abs()
             avg_delta = delta.values[np.triu_indices_from(delta.values, k=1)].mean()
             st.markdown(f"""
             <div class="card" style="margin-top:0.5rem">
               <div class="card-title">Correlation Fidelity</div>
               <div style="font-size:0.85rem; color:#e2e8f0">
-                Mean absolute correlation deviation: 
+                Mean absolute correlation deviation:
                 <span style="font-family:'Space Mono',monospace; color:#00d2ff; font-weight:700">
                   {avg_delta:.4f}
                 </span>
@@ -933,7 +851,6 @@ if st.session_state.df_synth is not None:
             st.markdown('<div class="card-title">Synthetic Data · Sample</div>', unsafe_allow_html=True)
             st.dataframe(df_synth.head(20), use_container_width=True, height=420)
 
-        # Statistical summary comparison
         st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
         st.markdown('<div class="card-title">Statistical Summary Comparison</div>', unsafe_allow_html=True)
         num_cols_both = [c for c in df_real.select_dtypes(include="number").columns if c in df_synth.columns]
@@ -943,13 +860,13 @@ if st.session_state.df_synth is not None:
             desc_r.columns = ["Real · " + c for c in desc_r.columns]
             desc_s.columns = ["Synth · " + c for c in desc_s.columns]
             combined = pd.concat([desc_r, desc_s], axis=1)
-            # Interleave columns: real mean, synth mean, real std, synth std …
             real_cols = desc_r.columns.tolist()
             synth_cols = desc_s.columns.tolist()
             ordered = [col for pair in zip(real_cols, synth_cols) for col in pair]
             st.dataframe(combined[ordered], use_container_width=True)
         else:
             st.info("No numeric columns to summarise.")
+
 
 # ── Empty state ───────────────────────────────────────────────────────────────
 if st.session_state.df_real is None:
@@ -962,16 +879,15 @@ if st.session_state.df_real is None:
     </div>
     """, unsafe_allow_html=True)
 
+
 # --- SYNTHOLOGIC SDK INTERFACE ---
 class SynthoLogic:
     """Developer API: from synthologic import SynthoLogic"""
     def __init__(self, api_key):
         self.api_key = api_key
-        
+
     def generate_vault(self, data, rows=1000, stress=True):
-        # Background mein generation aur stress testing karega
         synth = generate_synthetic(data, n_rows=rows)
         if stress:
-            # Adversarial logic yahan apply hoga
             pass
         return synth
