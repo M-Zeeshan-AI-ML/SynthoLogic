@@ -606,16 +606,22 @@ with col_cfg:
     st.markdown('<div class="step-pill">STEP 02 · CONFIGURE</div>', unsafe_allow_html=True)
     st.markdown('<div class="card">', unsafe_allow_html=True)
 
-    df_ref = st.session_state.df_real
-    n_rows_default = len(df_ref) if df_ref is not None else 100
+  df_ref = st.session_state.df_real
+    # Default rows ya toh file ki total rows hongi, ya max 100,000
+    if df_ref is not None:
+        actual_rows = len(df_ref)
+        n_rows_default = min(actual_rows, 100000) 
+    else:
+        n_rows_default = 100
 
     n_rows = st.number_input(
         "Synthetic rows to generate",
         min_value=10,
-        max_value=100_000,
-        value=n_rows_default,
+        max_value=100000,
+        value=int(n_rows_default), # Ensure it's an integer
         step=10,
         disabled=(df_ref is None),
+        help="Aap maximum 100,000 rows generate kar sakte hain."
     )
 
 # Corrected Checkbox Logic
