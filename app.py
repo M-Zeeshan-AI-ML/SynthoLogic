@@ -618,25 +618,24 @@ with col_cfg:
         disabled=(df_ref is None),
     )
 
+# Corrected Checkbox Logic
     mask_pii_flag = st.checkbox(
+        "Auto-mask PII columns with Faker",
+        value=True,
+        disabled=(df_ref is None),
+        help="Privacy score barhanay ke liye sensitive data ko fake values se replace karein."
+    )
 
-    # Naya Feature: Stress Testing
+    # Naya Feature: Stress Testing (As per Roadmap Phase 3)
     stress_test = st.checkbox(
         "Enable Adversarial Stress-Testing (Safety Vault)",
         value=False,
         help="AI ko break karne ke liye rare patterns aur edge-cases inject karein."
     )
 
-
-
-        
-        "Auto-mask PII columns with Faker",
-        value=True,
-        disabled=(df_ref is None),
-    )
-
     st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
 
+    # Generate Button - Properly Indented
     gen_btn = st.button(
         "▶ GENERATE SYNTHETIC DATA",
         disabled=(df_ref is None),
