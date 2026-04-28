@@ -606,7 +606,7 @@ with col_cfg:
     st.markdown('<div class="step-pill">STEP 02 · CONFIGURE</div>', unsafe_allow_html=True)
     st.markdown('<div class="card">', unsafe_allow_html=True)
 
-  df_ref = st.session_state.df_real
+df_ref = st.session_state.df_real
     # Default rows ya toh file ki total rows hongi, ya max 100,000
     if df_ref is not None:
         actual_rows = len(df_ref)
