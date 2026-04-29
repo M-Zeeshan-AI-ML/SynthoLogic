@@ -498,13 +498,23 @@ def _gaussian_copula(df: pd.DataFrame, n: int) -> pd.DataFrame:
 
 
 def apply_stress_test(df: pd.DataFrame) -> pd.DataFrame:
-    """Inject edge-case outliers into numeric columns only — safe for all dtypes."""
+    """Inject edge-case outliers into numeric columns — handles all dtypes safely."""
     df = df.copy()
     n_outliers = max(1, int(len(df) * 0.15))
     outlier_idx = np.random.choice(df.index, n_outliers, replace=False)
+
     for col in df.select_dtypes(include=[np.number]).columns:
+        original_dtype = df[col].dtype
         factor = np.random.uniform(5, 10, size=n_outliers)
-        df.loc[outlier_idx, col] = (df.loc[outlier_idx, col].astype(float) * factor).values
+
+        # Convert entire column to float64 first to avoid pandas dtype conflict
+        df[col] = df[col].astype(np.float64)
+        df.loc[outlier_idx, col] = df.loc[outlier_idx, col].values * factor
+
+        # Restore original integer dtype if needed
+        if np.issubdtype(original_dtype, np.integer):
+            df[col] = df[col].round().astype(original_dtype)
+
     return df
 
 
