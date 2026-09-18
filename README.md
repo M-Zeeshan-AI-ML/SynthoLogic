@@ -1,6 +1,6 @@
 ---
 title: SynthoLogic
-emoji: 🔬
+emoji: ❄
 colorFrom: blue
 colorTo: gray
 sdk: streamlit
@@ -22,13 +22,6 @@ A public evaluation account is available from the login screen:
 - **Password:** `Demo@123**`
 
 The Evaluation Sandbox has Enterprise feature visibility but **never has platform-admin access**. Each evaluation feature can be run once per sandbox account; after a feature is consumed, the user is directed to Structural Mind for Enterprise access.
-
-## Production storage
-
-- Without `DATABASE_URL`, the app uses local SQLite for a simple single-instance evaluation environment.
-- For production, set `DATABASE_URL` to PostgreSQL.
-- Admin credentials are supplied through `SYNTHOLOGIC_ADMIN_EMAIL` and `SYNTHOLOGIC_ADMIN_PASSWORD_HASH`.
-- The Computer Vision pipeline requires the server-side `HF_TOKEN` secret. The token is never shown to customers.
 
 ## Contact
 
